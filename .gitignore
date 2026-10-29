@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.idea/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large wordlists (exceed GitHub file size limits)
+rockyou.txt
