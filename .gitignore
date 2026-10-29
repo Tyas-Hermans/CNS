@@ -1,14 +1,2 @@
-# Virtual environment
-.venv/
-venv/
-
-# IDE
-.idea/
-
-# Python caches
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Large wordlists (exceed GitHub file size limits)
-rockyou.txt
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*

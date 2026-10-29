@@ -1,6 +1,6 @@
-from Crypto.Cipher import AES
-from Crypto.Util import Counter
-from Crypto.Random import get_random_bytes
+from Cryptodome.Cipher import AES
+from Cryptodome.Util import Counter
+from Cryptodome.Random import get_random_bytes
 
 def encrypt(key, nonce, msg):
     ctr = Counter.new(64, prefix=nonce)

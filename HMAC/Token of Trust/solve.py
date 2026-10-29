@@ -88,7 +88,7 @@ def solve():
     # 1. Log in and inspect the issued token.
     _, body = get("/login")
     token = json.loads(body)["token"]
-    header_b64, payload_b64, _sig = token.split(".")
+    header_b64, blob_b64, _sig = token.split(".")
     print("issued header :", b64url_decode(header_b64).decode())
     print("issued payload:", b64url_decode(payload_b64).decode())
 
