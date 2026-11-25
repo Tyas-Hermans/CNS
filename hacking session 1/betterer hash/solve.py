@@ -10,13 +10,14 @@ A real digest is one-way because it *compresses* (information is destroyed);
 here every step is invertible and the output is the same length as the input
 (37 bytes -> 37-byte flag), so we just run the eight rounds backwards.
 
-Each forward step and its inverse:
-    state[i] ^= (rnd*41 + i*17) & 0xff   ->  XOR the same constant again
-    state[i] = rol(state[i], (rnd+i)&7)  ->  ror by the same amount
-    state[i] ^= state[i-1]  (i ascending) ->  same XOR, i descending
-    state = state[1:] + state[:1]  (rol 1) ->  rotate right by one
+Each forward step and its inverse (8 rounds, per round):
+    per byte i:
+        x = rol(x ^ (rnd*23 + i*17), (rnd^i)&7)  ->  ror by same, then XOR C
+        x = (x + (rnd+1)*(i+3)) & 0xff           ->  subtract the same amount
+    chain i=1..n-1 (ascending):
+        s[i] ^= rol(s[i-1], i&7)                 ->  same XOR, i descending
 
-    Flag: cns{7f91c6f8c3d14af8b9f52d6b7f6e13c4}
+    Flag: cns{i_should_just_stick_to_sha_256}
 
 Lesson: confusion + diffusion without compression (or a secret) is just
 encryption you can trivially reverse -- not a preimage-resistant hash.
@@ -56,15 +57,17 @@ def bettererhash(msg):
 def invert(hash_hex):
     state = bytearray.fromhex(hash_hex)
     for rnd in range(7, -1, -1):
-        # undo the prefix-rol chain, in reverse index order
-        for i in range(1,len(state)):
-            state[i] ^= ror(state[i-1], i & 7)
-        # undo (constant-XOR then rol) per byte, reversed
+        # undo the prefix-rol chain: XOR is self-inverse, so re-apply the
+        # SAME rol(s[i-1]); walk the indices in reverse so each s[i-1] still
+        # holds its post-chaining value when we use it.
+        for i in range(len(state) - 1, 0, -1):
+            state[i] ^= rol(state[i - 1], i & 7)
+        # undo the per-byte step, reversing (rol(x ^ C, r); x = x + A):
+        # first subtract A, then ror by r, then XOR C back.
         for i in range(len(state)):
             x = state[i]
-            x = (x + ((rnd + 1) * (i + 3))) & 0xff
-            x = ror(x ^ ((rnd * 23 + i * 17) & 0xff),
-                    ((rnd ^ i) & 7))
+            x = (x - ((rnd + 1) * (i + 3))) & 0xff
+            x = ror(x, ((rnd ^ i) & 7)) ^ ((rnd * 23 + i * 17) & 0xff)
             state[i] = x
     return bytes(state)
 def normal(hash_hex):
