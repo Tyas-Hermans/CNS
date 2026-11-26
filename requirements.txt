@@ -1,0 +1,8 @@
+# Number theory / math (factorint, isprime, discrete_log, nthroot, ...)
+sympy>=1.12
+
+# AES / DES ciphers. Both are needed because the scripts use both namespaces:
+#   pycryptodome  -> `from Crypto...`      (Block Ciphers/AES 2, Key standardisation)
+#   pycryptodomex -> `from Cryptodome...`  (Noncense, hacking session 1/noncensical)
+pycryptodome>=3.20
+pycryptodomex>=3.20
