@@ -34,7 +34,6 @@ def post(path, obj):
 def main():
     params = get("/params")
     p, g = params["p"], params["g"]
-
     x = secrets.randbelow(p - 3) + 2        # our private key
     y = pow(g, x, p)                        # our public key
     name = "solver_pwn_" + secrets.token_hex(3)

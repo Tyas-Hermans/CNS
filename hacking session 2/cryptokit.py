@@ -20,6 +20,18 @@ import time
 from fractions import Fraction
 from typing import Callable, Iterable
 
+# Lattice attacks (pure-Python LLL + Coppersmith).  Small-modulus demo quality;
+# for real 1024-bit challenges use the Sage snippets in ../RSA attacks/.
+try:
+    from coppersmith import (lll, coppersmith_univariate, factor_high_bits,
+                             stereotyped_e3)
+except ImportError:  # when cryptokit is imported from another folder
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+    from coppersmith import (lll, coppersmith_univariate, factor_high_bits,
+                             stereotyped_e3)
+
 # ---------------------------------------------------------------------------
 # Conversions
 # ---------------------------------------------------------------------------

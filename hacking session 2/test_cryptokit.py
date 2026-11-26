@@ -35,15 +35,31 @@ def rsa_pair(bits=512, e=65537):
             return p, q
 
 
-def smooth_prime(bits, B=1 << 16):
-    """prime p with p-1 B-smooth"""
-    small = list(primerange(3, B))
+def _sqfree(bits, B):
+    pool = list(primerange(3, B))
     while True:
-        n = 2
-        while n.bit_length() < bits:
-            n *= random.choice(small)
+        random.shuffle(pool)
+        n, i = 2, 0
+        while n.bit_length() < bits and i < len(pool):
+            n *= pool[i]; i += 1
+        if n.bit_length() >= bits:
+            return n
+
+
+def smooth_prime(bits, B=1 << 16):
+    """prime p with p-1 B-smooth (square-free, so every prime power <= B)"""
+    while True:
+        n = _sqfree(bits, B)
         if is_probable_prime(n + 1):
             return n + 1
+
+
+def smooth_plus_prime(bits, B=1 << 13):
+    """prime p with p+1 B-smooth"""
+    while True:
+        n = _sqfree(bits, B)
+        if is_probable_prime(n - 1):
+            return n - 1
 
 
 def test(fn):
@@ -94,6 +110,12 @@ def factor_smooth_p_minus_1():
     p, q = smooth_prime(256), prime(256)
     f = pollard_p1(p * q, 1 << 16)
     assert f in (p, q)
+
+
+@test
+def factor_smooth_p_plus_1():
+    p, q = smooth_plus_prime(256), prime(256)
+    assert williams_p1(p * q, 1 << 13) in (p, q)
 
 
 @test
@@ -239,6 +261,24 @@ def rsa_bleichenbacher_e3_forgery():
 
 
 # --------------------------------------------------------------- discrete log
+@test
+def coppersmith_stereotyped_small():
+    # small modulus so pure-Python LLL stays fast; real sizes need Sage/fpylll
+    n = prime(160) * prime(160)
+    msg = b"launch code: cns{z}"
+    unknown = 4
+    known = (b2i(msg) >> (8 * unknown)) << (8 * unknown)
+    c = pow(b2i(msg), 3, n)
+    assert stereotyped_e3(c, n, known, unknown, m=3) == msg
+
+
+@test
+def coppersmith_high_bits_small():
+    p, q = prime(160), prime(160)
+    ub = 55
+    assert set(factor_high_bits(p * q, (p >> ub) << ub, ub, m=6)) == {p, q}
+
+
 @test
 def dlog_pohlig_hellman():
     p = smooth_prime(256, 1 << 20)
