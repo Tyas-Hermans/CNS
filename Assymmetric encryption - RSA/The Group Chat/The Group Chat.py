@@ -40,7 +40,7 @@ def crt(remainders, moduli):
 
 
 def solve():
-    # Hastad's broadcast attack: same M, e=3, three different moduli.
+    # Hastad's broadcast attack: , e=3, three different moduli.
     # CRT gives X = M^3 mod n1*n2*n3, and since M^3 < n1*n2*n3, X == M^3 exactly.
     X = crt([c1, c2, c3], [n1, n2, n3])
     M, exact = integer_nthroot(X, 3)
